@@ -21,7 +21,7 @@ from tensorflow.keras.callbacks import TensorBoard
 # Directorio raíz donde se encuentran las carpetas de cada letra
 root_dir = 'Dataset'
 
-# Lista para almacenar las imágenes y sus etiquetas
+# Listas para almacenar las imágenes y sus etiquetas
 data = []
 labels = []
 
@@ -34,17 +34,15 @@ for label in os.listdir(root_dir):
         # Recorre cada imagen dentro de la carpeta
         for img_name in os.listdir(folder_path):
             img_path = os.path.join(folder_path, img_name)
-            
             # Cargar la imagen usando OpenCV
             img = cv2.imread(img_path)
-            # Normalize pixel values to the range [0, 1]
+            # Se normaliza el valor de los pixeles al rango [0, 1]
             img = img / 255.0
-                
             # Añadir la imagen y su etiqueta a las listas
             data.append(img)
             labels.append(label)
 
-# Convertir las listas en arrays de NumPy para su uso en ML
+# Conversión de las listas en arrays de NumPy para su uso en ML
 data = np.array(data)
 labels = np.array(labels)
 
@@ -53,7 +51,7 @@ print(f"Etiquetas asociadas: {set(labels)}")
 print(data.shape)
 #print(data[0])
 
-# Split the dataset into training and testing sets
+# Se divide el dataset en sets de entrenamiento y de prueba
 X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, stratify=labels, random_state=42)
 print("X_train shape: ", X_train.shape)
 print("y_train shape: ", y_train.shape)
@@ -87,12 +85,9 @@ def guardar_imagenes(data, n):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
     plt.tight_layout()
-    plt.savefig('prueba.png')
+    plt.savefig('prueba#2.png')
 
 guardar_imagenes(X_train, 20)
-
-#-----------------------------------------------------------------------------------#
-
 
 #-----------------------------------------------------------------------------------#
 
@@ -122,11 +117,13 @@ cnn_model = tf.keras.models.Sequential([
 
 ])
 
-# Compile the model
+# Se compila el modelo
 cnn_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-# Print the model summary
+# Se imprime un resumen del modelo
 cnn_model.summary()
+
+#-----------------------------------------------------------------------------------#
 
 # Define the EarlyStopping callback
 early_stopping = EarlyStopping(
@@ -136,16 +133,18 @@ early_stopping = EarlyStopping(
     restore_best_weights=True    # Restore the model weights from the epoch with the best monitored value
 )
 
-# Train the model
+#-----------------------------------------------------------------------------------#
+
+# Entrenamiento del modelo
 
 print("Entrenando modelo...");
 
-BoardCNN = TensorBoard(log_dir = "C:/Users/juanp/OneDrive/Documentos/GitHub/LESCO-VI/Boards")
+BoardCNN = TensorBoard(log_dir = "C:/Users/juanp/OneDrive/Documentos/GitHub/LESCO-VI/Boards2")
 history = cnn_model.fit(X_train,
                         y_train,
                         verbose=1,
                         epochs=100,
-                        validation_split=0.2,  # Use a portion of the training data as a validation set
+                        validation_split=0.2,  # Usar una parte de los datos de entrenamiento como set de validación
                         batch_size=32,
                         callbacks=[early_stopping, BoardCNN]
                         #steps_per_epoch=int(np.ceil((len(X_train)*0.8) / float(32))),
@@ -154,32 +153,24 @@ history = cnn_model.fit(X_train,
 
 print("Modelo entrenado!");
 
+#-----------------------------------------------------------------------------------#
+
 print("Evaluando modelo...");
 
 loss, accuracy = cnn_model.evaluate(X_test, y_test, verbose=0)
+
 print(f"Pérdida en el conjunto de prueba: {loss}")
 print(f"Precisión en el conjunto de prueba: {accuracy}")
 
 print("Modelo evaluado!");
 
+#-----------------------------------------------------------------------------------#
+
 print("Guardando modelo...");
 
-cnn_model.save('ClasificadorCNN.h5')
-cnn_model.save_weights('PesosCNN.weights.h5')
+cnn_model.save('ModeloEntrenado.h5')
+cnn_model.save_weights('PesosModelo.weights.h5')
 
 print("Modelo guardado!");
-
-
-
-
-# A tomar en cuenta:
-# diferencias en parametros de entrenamiento, problemas con keras, por ende con Early stopping y Tensorboard
-# Investigar funciones de perdida y de activación
-
-#Early stopping conditioned on metric `val_loss` which is not available. Available metrics are: accuracy,loss
-
-#UserWarning: Your input ran out of data; interrupting training. 
-# Make sure that your dataset or generator can generate at least `steps_per_epoch * epochs` batches. 
-# You may need to use the `.repeat()` function when building your dataset.
 
 #tensorboard --logdir="C:/Users/juanp/OneDrive/Documentos/GitHub/LESCO-VI/Boards"

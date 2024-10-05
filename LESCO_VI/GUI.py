@@ -16,9 +16,8 @@ mp_drawing = mp.solutions.drawing_utils
 # Se define el tamaño estándar para las imágenes recortadas
 standard_size = (128, 128)  
 
-# Se lee nuestro modelo entrenado
-# Cargar el modelo desde el archivo
-cnn_model = load_model('ClasificadorCNN.h5')
+# Se carga nuestro modelo entrenado
+cnn_model = load_model('ModeloEntrenado.h5')
 
 # Print the model summary
 #cnn_model.summary()
@@ -49,9 +48,6 @@ while True:
     # Se verifica si se detectó alguna mano
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks:
-
-            # Dibujar las conexiones de la mano en la imagen original
-            #mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
             
             # Se calculan los límites de la mano (bounding box)
             h, w, _ = frame.shape
@@ -78,9 +74,6 @@ while True:
             x_max = min(w, x_max + margin)
             y_max = min(h, y_max + margin)
 
-            # Dibujar el bounding box en la imagen
-            #cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-
             # Se recorta la imagen para obtener solo la región de la mano
             cropped_hand = frame[y_min:y_max, x_min:x_max]
 
@@ -90,50 +83,47 @@ while True:
             # Se redimensiona la imagen recortada al tamaño estándar
             resized_hand = cv2.resize(cropped_hand, standard_size)
 
-            # Normalize pixel values to the range [0, 1]
+            # Se normaliza el valor de los pixeles al rango [0, 1]
             img = resized_hand / 255.0
 
-            # Añadir la imagen a la lista
+            # Se añade la imagen a la lista
             data_aux.append(img)
 
-            # Dibujar las conexiones de la mano en la imagen original
+            # Se dibujan las conexiones de la mano en la imagen original
             mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
+            # Se realiza la predicción mediant el modelo entrenado (vector one hot)
             prediccion_one_hot = cnn_model.predict(np.array(data_aux))
 
+            # Se castea la predicción en formato one hot a su representación númerica
             prediccion_numero = np.argmax(prediccion_one_hot)
 
-            #print(prediccion_one_hot)
-
-            #print(prediccion_numero)
-
+            # Se castea la representación númerica a su correspondiente letra mediante la ayuda de un diccionario
             prediccion = numeros_a_letras[prediccion_numero]
 
-            #print(prediccion)
-
-            # Dibujar el bounding box en la imagen
+            # Se dibuja el bounding box en la imagen
             cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
 
-            # posición inicial del texto con la prediccion
-            text_position = (x_min, y_min - 10)  # 10 píxeles arriba del rectángulo
+            # Se define la posición del texto (10 píxeles arriba del rectángulo)
+            text_position = (x_min, y_min - 10)
 
-            # Dibujar el texto encima del rectángulo
-            cv2.putText(frame,                  # Imagen sobre la que se dibuja el texto
-                        prediccion,             # Texto a mostrar
-                        text_position,          # Posición (x, y) donde se coloca el texto
+            # Se dibuja el texto encima del rectángulo
+            cv2.putText(frame,                     # Imagen sobre la que se dibuja el texto
+                        prediccion,                # Texto a mostrar
+                        text_position,             # Posición (x, y) donde se coloca el texto
                         cv2.FONT_HERSHEY_SIMPLEX,  # Fuente del texto
-                        1,                      # Tamaño de la fuente
-                        (0, 255, 0),            # Color del texto en formato BGR
-                        2,                      # Grosor del texto
-                        cv2.LINE_AA)            # Tipo de línea para una mejor apariencia
+                        1,                         # Tamaño de la fuente
+                        (0, 255, 0),               # Color del texto en formato BGR
+                        2,                         # Grosor del texto
+                        cv2.LINE_AA)               # Tipo de línea para una mejor apariencia
     
     # Se muestra la imagen con las anotaciones en la ventana principal
-    cv2.imshow('Deteccion de manos', frame)
+    cv2.imshow('Sistema LESCO VI', frame)
     
     # Se sale del bucle si se presiona la tecla 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Liberar la cámara y cerrar todas las ventanas
+# Se libera la cámara y se cierran todas las ventanas
 cap.release()
 cv2.destroyAllWindows()

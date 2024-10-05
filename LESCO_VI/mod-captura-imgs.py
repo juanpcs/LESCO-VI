@@ -41,9 +41,6 @@ while True:
     # Se verifica si se detectó alguna mano
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks:
-
-            # Dibujar las conexiones de la mano en la imagen original
-            #mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
             
             # Se calculan los límites de la mano (bounding box)
             h, w, _ = frame.shape
@@ -70,9 +67,6 @@ while True:
             x_max = min(w, x_max + margin)
             y_max = min(h, y_max + margin)
 
-            # Dibujar el bounding box en la imagen
-            #cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-
             # Se recorta la imagen para obtener solo la región de la mano
             cropped_hand = frame[y_min:y_max, x_min:x_max]
 
@@ -86,7 +80,7 @@ while True:
             current_time = time.time()
 
             # Se verifica si han pasado x segundos desde la última captura
-            if current_time - start_time >= 0.5:
+            if current_time - start_time >= 3:
                 # Se guarda la imagen recortada
                 img_name = f"mano_estandarizada_{img_counter}.png"
                 cv2.imwrite(os.path.join(output_dir, img_name), resized_hand)
@@ -102,12 +96,12 @@ while True:
             cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
     
     # Se muestra la imagen con las anotaciones en la ventana principal
-    cv2.imshow('Detección de Manos en Tiempo Real', frame)
+    cv2.imshow('Detección de Manos', frame)
     
     # Se sale del bucle si se presiona la tecla 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Liberar la cámara y cerrar todas las ventanas
+# # Se libera la cámara y se cierran todas las ventanas
 cap.release()
 cv2.destroyAllWindows()
