@@ -16,7 +16,7 @@ output_dir = "y"
 os.makedirs(output_dir, exist_ok=True)
 
 # Contador para nombrar las imágenes
-img_counter = 140
+img_counter = 0
 
 # Tiempo de inicio para controlar la captura de fotos
 start_time = time.time()
@@ -80,7 +80,7 @@ while True:
             current_time = time.time()
 
             # Se verifica si han pasado x segundos desde la última captura
-            if current_time - start_time >= 3:
+            if current_time - start_time >= 1:
                 # Se guarda la imagen recortada
                 img_name = f"mano_estandarizada_{img_counter}.png"
                 cv2.imwrite(os.path.join(output_dir, img_name), resized_hand)
